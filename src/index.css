@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply bg-navy-950 text-slate-200 font-sans antialiased;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(34, 211, 238, 0.06), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(45, 212, 191, 0.05), transparent 40%);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.glass-card {
+  @apply bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-xl shadow-glass;
+}
+
+.glass-card-hover {
+  @apply transition-all duration-300 hover:bg-white/[0.05] hover:border-white/[0.14] hover:shadow-glow;
+}
+
+.section-label {
+  @apply text-xs font-semibold tracking-widest uppercase text-slate-400;
+}
+
+.badge-demo {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-amber-500/10 text-amber-300 border border-amber-500/20;
+}
+
+.badge-planned {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-violet-500/10 text-violet-300 border border-violet-500/20;
+}
+
+.badge-implemented {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/20;
+}
