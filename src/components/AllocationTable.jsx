@@ -149,8 +149,8 @@ export default function AllocationTable({ data }) {
               <p className="text-sm text-slate-300 leading-relaxed">
                 The model allocates a higher share to {selected.name.toLowerCase()} when socioeconomic indicators
                 associated with this sector (e.g. demand pressure, coverage gaps, or strategic priority) are
-                elevated relative to other sectors. This explanation is illustrative; formal feature-level
-                attribution (SHAP) is planned future work.
+                elevated relative to other sectors. This explanation is illustrative; live SHAP/LIME explanations
+                are currently available only for the healthcare target on the Explainable AI page.
               </p>
             </div>
           </div>

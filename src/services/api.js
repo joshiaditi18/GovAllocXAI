@@ -1,12 +1,9 @@
 // =========================================================================
 // api.js — Backend-ready API service layer
 // -------------------------------------------------------------------------
-// Every function below MOCKS the response of a real Flask/FastAPI + ML
-// backend using data from demoData.js. When a real backend is available,
-// replace the body of each function with the corresponding `fetch()` call
-// (already sketched in comments) — the function signatures and return
-// shapes are designed to match what the real API should return, so no
-// changes should be needed in the pages/components that call them.
+// Most functions below mock responses from the Flask/FastAPI + ML backend
+// using data from demoData.js. Explainability uses the live API because the
+// explanation values must come from the trained model.
 // =========================================================================
 
 import {
@@ -15,11 +12,14 @@ import {
   MODEL_METRICS,
   SYSTEM_METRICS,
   SDG_DEFINITIONS,
-  XAI_DEMO_FEATURES,
+  BENCHMARK_XAI_RESULT,
+  BENCHMARK_ALL_SECTORS,
 } from "../data/demoData";
 
-const USE_MOCK = true; // flip to false once a real backend is connected
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+const USE_MOCK = true; // applies to the demo endpoints, not explainability
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || "/api"
+).replace(/\/+$/, "");
 
 function simulateDelay(ms = 900) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -127,22 +127,59 @@ export async function getSdgImpact() {
 }
 
 /**
- * GET /api/explainability
- * NOTE: real SHAP/LIME integration is PLANNED / FUTURE WORK. This mock
- * mirrors the intended future response shape so the frontend does not
- * need to change once real explainability is wired up.
+ * POST /api/explainability
+ * Input: { target, features } using the XGBoost notebook's feature names.
  */
-export async function getExplainability() {
-  if (USE_MOCK) {
-    await simulateDelay(500);
-    return {
-      status: "planned",
-      note: "DEMO EXPLANATION — SHAP INTEGRATION PENDING",
-      features: XAI_DEMO_FEATURES,
-    };
+export async function getExplainability(features, target = "healthcare_usd") {
+  const candidateUrls = [
+    `${API_BASE_URL}/explainability`,
+    "http://127.0.0.1:8000/api/explainability",
+    "http://localhost:8000/api/explainability",
+  ];
+
+  for (const url of candidateUrls) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target, features }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          ...data,
+          source: "live",
+        };
+      }
+    } catch {
+      // Try next candidate URL
+    }
   }
-  // const response = await fetch(`${API_BASE_URL}/explainability`);
-  // return response.json();
+
+  // Graceful fallback to pre-computed XGBoost model benchmark explanations (SHAP & LIME)
+  // if backend server is unreachable
+  const targetSectorItem = BENCHMARK_ALL_SECTORS.find((s) => s.target === target) || BENCHMARK_ALL_SECTORS[0];
+  const explanations = BENCHMARK_XAI_RESULT.explanations.map((exp) => ({
+    ...exp,
+    feature_value:
+      features && features[exp.feature] !== undefined && features[exp.feature] !== ""
+        ? Number(features[exp.feature])
+        : exp.feature_value,
+  }));
+
+  const totalBudget = BENCHMARK_ALL_SECTORS.reduce((sum, s) => sum + s.predicted_amount, 0);
+
+  return {
+    target: target || "healthcare_usd",
+    target_name: targetSectorItem.name,
+    prediction: targetSectorItem.predicted_amount,
+    total_budget: totalBudget,
+    all_sectors: BENCHMARK_ALL_SECTORS,
+    source: "benchmark",
+    offlineNotice: "Backend server not responding. Displaying benchmark XGBoost model explanations (SHAP & LIME). To enable live inferences, start backend via 'npm run backend'.",
+    explanations,
+  };
 }
 
 // Simulated multi-stage pipeline progress used by the Budget Prediction page

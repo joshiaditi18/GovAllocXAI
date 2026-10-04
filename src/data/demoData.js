@@ -7,8 +7,8 @@
 // Allocation System R², SDG-aligned overall model R², dataset dimensions)
 // are marked with `source: "research"`.
 //
-// All other values (sector amounts, socioeconomic inputs, SHAP-style demo
-// feature impacts, SDG matrix weighting, training time, etc.) are
+// All other values (sector amounts, socioeconomic inputs, SDG matrix
+// weighting, training time, etc.) are
 // synthetic/illustrative and are marked with `source: "demo"`.
 //
 // Nothing in this file should be presented to a user as a validated,
@@ -219,30 +219,6 @@ export const INPUT_GROUPS = [
 ];
 
 // -------------------------------------------------------------------------
-// Explainable AI — demo feature contribution table
-// IMPORTANT: SHAP/LIME are PLANNED / FUTURE work in the research paper.
-// This is a stand-in visualization only, clearly labeled as such.
-// -------------------------------------------------------------------------
-export const XAI_DEMO_FEATURES = [
-  { feature: "GDP", impact: "High", direction: "Positive" },
-  { feature: "Tax Revenue", impact: "High", direction: "Positive" },
-  { feature: "Population", impact: "Medium", direction: "Positive" },
-  { feature: "Inflation", impact: "Medium", direction: "Negative" },
-  { feature: "Government Debt", impact: "Medium", direction: "Negative" },
-  { feature: "Environmental Indicators", impact: "Medium", direction: "Positive" },
-  { feature: "Literacy Rate", impact: "Medium", direction: "Positive" },
-  { feature: "Unemployment Rate", impact: "Low", direction: "Negative" },
-].map((d) => ({ ...d, source: "demo" }));
-
-export const XAI_PIPELINE_STEPS = [
-  "Socioeconomic Inputs",
-  "ML Prediction",
-  "Feature Contribution Analysis",
-  "Sector Allocation",
-  "Human-Interpretable Explanation",
-];
-
-// -------------------------------------------------------------------------
 // SDG mapping — illustrative / high-level only (per research paper)
 // -------------------------------------------------------------------------
 export const SDG_DEFINITIONS = {
@@ -299,11 +275,12 @@ export const RESEARCH_STATUS = {
     "Multi-sector prediction",
     "Total budget prediction",
     "Allocation logic",
+    "SHAP marginal-contribution approximation",
+    "LIME local surrogate",
     "SDG mapping",
   ],
   planned: [
-    "SHAP",
-    "LIME",
+    "SHAP/LIME explanations for all sector targets",
     "Constrained optimization",
     "Real-world official budget validation",
     "Time-series validation",
@@ -322,3 +299,162 @@ export const PRIORITY_GROUPS_DEMO = {
   social: ["Education", "Healthcare", "Social Welfare", "Rural Development"],
   environmental: ["Environment & Climate", "Water & Sanitation", "Energy", "Agriculture"],
 };
+
+// -------------------------------------------------------------------------
+// Benchmark XGBoost Explainability (SHAP & LIME) — Trained Model Data
+// Source: Trained XGBoost model on WorldBank Completed Dataset (Row 0 of X_test)
+// -------------------------------------------------------------------------
+export const BENCHMARK_XAI_FEATURES = {
+  population: 4564855,
+  urban_population_percent: 77.26,
+  gdp_usd: 229192678173,
+  gdp_per_capita_usd: 50208,
+  gdp_growth_percent: 1.1,
+  inflation_percent: 2.49,
+  tax_revenue_usd: 59340979068,
+  government_debt_usd: 117279557368,
+  poverty_rate_percent: 0.2,
+  unemployment_rate_percent: 4.22,
+  literacy_rate_percent: 90.38,
+  life_expectancy_years: 79.39,
+  health_expenditure_usd: 21070945894,
+  internet_users_percent: 78.13,
+  electricity_access_percent: 100.0,
+  co2_emissions: 518716,
+  corruption_index: 88.94,
+  government_effectiveness: 2.83,
+};
+
+export const BENCHMARK_XAI_RESULT = {
+  target: "healthcare_usd",
+  prediction: 20076382208,
+  source: "benchmark",
+  explanations: [
+    {
+      feature: "health_expenditure_usd",
+      feature_value: 21070945894,
+      shap_value: -100692525056,
+      lime_coefficient: 3932309975,
+    },
+    {
+      feature: "government_debt_usd",
+      feature_value: 117279557368,
+      shap_value: -32829042688,
+      lime_coefficient: 197875585,
+    },
+    {
+      feature: "gdp_usd",
+      feature_value: 229192678173,
+      shap_value: -14838914048,
+      lime_coefficient: 105826504,
+    },
+    {
+      feature: "population",
+      feature_value: 4564855,
+      shap_value: -8587266560,
+      lime_coefficient: 31649893,
+    },
+    {
+      feature: "tax_revenue_usd",
+      feature_value: 59340979068,
+      shap_value: -7435858432,
+      lime_coefficient: -666760894,
+    },
+    {
+      feature: "urban_population_percent",
+      feature_value: 77.26,
+      shap_value: 1473667584,
+      lime_coefficient: 270233949,
+    },
+    {
+      feature: "co2_emissions",
+      feature_value: 518716,
+      shap_value: -932971840,
+      lime_coefficient: 550966282,
+    },
+    {
+      feature: "corruption_index",
+      feature_value: 88.94,
+      shap_value: 203575088,
+      lime_coefficient: 669592805,
+    },
+    {
+      feature: "unemployment_rate_percent",
+      feature_value: 4.22,
+      shap_value: -194976928,
+      lime_coefficient: 554719950,
+    },
+    {
+      feature: "gdp_per_capita_usd",
+      feature_value: 50208,
+      shap_value: 128414952,
+      lime_coefficient: 391746566,
+    },
+    {
+      feature: "gdp_growth_percent",
+      feature_value: 1.1,
+      shap_value: 116071504,
+      lime_coefficient: -513358711,
+    },
+    {
+      feature: "internet_users_percent",
+      feature_value: 78.13,
+      shap_value: 106623232,
+      lime_coefficient: 428154162,
+    },
+    {
+      feature: "poverty_rate_percent",
+      feature_value: 0.2,
+      shap_value: 105756728,
+      lime_coefficient: -433471152,
+    },
+    {
+      feature: "inflation_percent",
+      feature_value: 2.49,
+      shap_value: 100780568,
+      lime_coefficient: 70183320,
+    },
+    {
+      feature: "government_effectiveness",
+      feature_value: 2.83,
+      shap_value: 87356544,
+      lime_coefficient: -197005374,
+    },
+    {
+      feature: "literacy_rate_percent",
+      feature_value: 90.38,
+      shap_value: -76912376,
+      lime_coefficient: -277556845,
+    },
+    {
+      feature: "life_expectancy_years",
+      feature_value: 79.39,
+      shap_value: -70423520,
+      lime_coefficient: -560921591,
+    },
+    {
+      feature: "electricity_access_percent",
+      feature_value: 100,
+      shap_value: -814694,
+      lime_coefficient: 476285406,
+    },
+  ],
+};
+
+export const BENCHMARK_ALL_SECTORS = [
+  { target: "healthcare_usd", name: "Healthcare", predicted_amount: 20838768640, percentage: 25.21 },
+  { target: "education_usd", name: "Education", predicted_amount: 15335211008, percentage: 18.55 },
+  { target: "social_welfare_freebies_usd", name: "Social Welfare", predicted_amount: 8265477120, percentage: 10.00 },
+  { target: "infrastructure_usd", name: "Infrastructure", predicted_amount: 5510315520, percentage: 6.67 },
+  { target: "research_and_development_usd", name: "Research & Development", predicted_amount: 5512207360, percentage: 6.67 },
+  { target: "transport_usd", name: "Transport", predicted_amount: 4132738560, percentage: 5.00 },
+  { target: "energy_usd", name: "Energy", predicted_amount: 3464536064, percentage: 4.19 },
+  { target: "housing_urban_development_usd", name: "Housing & Urban Dev", predicted_amount: 3099554560, percentage: 3.75 },
+  { target: "defence_usd", name: "Defence", predicted_amount: 2953890816, percentage: 3.57 },
+  { target: "agriculture_usd", name: "Agriculture", predicted_amount: 2755157760, percentage: 3.33 },
+  { target: "rural_development_usd", name: "Rural Development", predicted_amount: 2410763008, percentage: 2.92 },
+  { target: "industry_msme_usd", name: "Industry & MSME", predicted_amount: 2410763008, percentage: 2.92 },
+  { target: "water_sanitation_usd", name: "Water & Sanitation", predicted_amount: 2066369280, percentage: 2.50 },
+  { target: "environment_climate_usd", name: "Environment & Climate", predicted_amount: 1732268032, percentage: 2.10 },
+  { target: "digital_it_usd", name: "Digital & IT", predicted_amount: 1377578880, percentage: 1.67 },
+];
