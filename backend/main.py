@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+import os
 from pathlib import Path
 from typing import Literal
 
@@ -180,6 +181,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -188,8 +195,12 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:4173",
         "http://127.0.0.1:4173",
+        *frontend_origins,
     ],
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_origin_regex=(
+        r"http://(localhost|127\.0\.0\.1)(:\d+)?"
+        r"|https://[a-zA-Z0-9-]+\.onrender\.com"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

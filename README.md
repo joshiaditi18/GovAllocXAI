@@ -75,8 +75,9 @@ Everything is centralized in `src/data/demoData.js`:
 
 All backend calls are centralized in `src/services/api.js`. Most endpoints
 currently return mocked data derived from `demoData.js`; the Explainable AI
-page calls its backend endpoint directly. Configure `VITE_API_BASE_URL` in a
-`.env` file (defaults to `http://localhost:8000/api`):
+page calls its backend endpoint directly. Configure `VITE_API_BASE_URL` to the
+backend API base URL, including `/api`. During local development it defaults
+to `/api`, which Vite proxies to `http://127.0.0.1:8000`:
 
 - `POST /api/predict-budget` — body `{ socioeconomic_features }`
 - `POST /api/predict-allocation`
@@ -89,6 +90,16 @@ page calls its backend endpoint directly. Configure `VITE_API_BASE_URL` in a
 
 No changes should be required in `pages/` or `components/` once the backend
 is wired up, since they only ever import from `services/api.js`.
+
+For production, `.env.production` points the frontend at the deployed Render
+backend. Vite embeds this URL at build time, so rebuild/redeploy the frontend
+after changing it. For a different backend URL, update `VITE_API_BASE_URL` in
+`.env.production` (or configure that variable in your frontend hosting
+provider).
+
+The backend allows Render-hosted frontend origins. If your frontend is hosted
+elsewhere, set `FRONTEND_ORIGINS` on the backend service to its exact origin
+(for example, `https://your-app.example.com`).
 
 ### XGBoost explainability endpoint
 
